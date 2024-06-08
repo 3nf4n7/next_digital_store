@@ -3,8 +3,6 @@ import MaxWidthWrapper from "./MaxWidthWrapper";
 import { Icons } from "./Icons";
 import NavItems from "./NavItems";
 import { buttonVariants } from "./ui/button";
-import { Span } from "next/dist/trace";
-import { Divide } from "lucide-react";
 
 const Navbar = () => {
   const user = null;
