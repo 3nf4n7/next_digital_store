@@ -1,0 +1,6 @@
+{
+    "watch": ["server.ts", "src/collections/**/*.ts", "src/trps/index.ts"],
+    "exec": "tsx src/server.ts",
+    "ext": "js, ts",
+    "stdin": false
+}
