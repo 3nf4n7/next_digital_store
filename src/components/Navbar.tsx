@@ -4,9 +4,13 @@ import { Icons } from "./Icons";
 import NavItems from "./NavItems";
 import { buttonVariants } from "./ui/button";
 import Cart from "./Cart";
+import { getServerSideUser } from "@/lib/payload-utils";
+import { cookies } from "next/headers";
+import UserAccountNav from "./UserAccountNav";
 
-const Navbar = () => {
-  const user = null;
+const Navbar = async () => {
+  const nextCookies = cookies();
+  const { user } = await getServerSideUser(nextCookies);
 
   return (
     <div className="bg-white sticky z-50 top-0 inset-x-0 h-16">
@@ -37,20 +41,42 @@ const Navbar = () => {
                   )}
 
                   {user ? null : (
-                    <span className="h-6 w-px bg-gray-200" aria-hidden="true"></span>
+                    <span
+                      className="h-6 w-px bg-gray-200"
+                      aria-hidden="true"
+                    ></span>
                   )}
 
-                  {user ? <p></p> : <Link href='/sign-up' className={buttonVariants({variant: "ghost"})}>Регистрация</Link>}
+                  {user ? (
+                    <UserAccountNav user={user} />
+                  ) : (
+                    <Link
+                      href="/sign-up"
+                      className={buttonVariants({ variant: "ghost" })}
+                    >
+                      Регистрация
+                    </Link>
+                  )}
 
-                  {user ? <span className="h-6 w-px bg-gray-200" aria-hidden="true"></span> : null}
+                  {user ? (
+                    <span
+                      className="h-6 w-px bg-gray-200"
+                      aria-hidden="true"
+                    ></span>
+                  ) : null}
 
-                  {user ? null : <div className="flex lg:ml-6">
-                    <span className="h-6 w-px bg-gray-200" aria-hidden="true"></span>
-                    </div>}
-
-                    <div className="ml-4 flow-root lg:ml-6">
-                      <Cart></Cart>
+                  {user ? null : (
+                    <div className="flex lg:ml-6">
+                      <span
+                        className="h-6 w-px bg-gray-200"
+                        aria-hidden="true"
+                      ></span>
                     </div>
+                  )}
+
+                  <div className="ml-4 flow-root lg:ml-6">
+                    <Cart></Cart>
+                  </div>
                 </div>
               </div>
             </div>

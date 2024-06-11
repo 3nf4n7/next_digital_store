@@ -15,9 +15,22 @@ import {
 import { trpc } from "@/trpc/client";
 import { toast } from "sonner";
 import { ZodError } from "zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const Page = () => {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const isSeller = searchParams.get("as") === "seller";
+  const origin = searchParams.get("origin");
+
+  const continueAsSeller = () => {
+    router.push("?as=seller");
+  };
+
+  const continueAsBuyer = () => {
+    router.replace("/sign-in", undefined);
+  };
+
   const {
     register,
     handleSubmit,
@@ -26,29 +39,32 @@ const Page = () => {
     resolver: zodResolver(AuthCredentialsValidator),
   });
 
-  const router = useRouter();
+  const { mutate: signIn, isLoading } = trpc.auth.signIn.useMutation({
+    onSuccess: () => {
+      toast.success("Вы вошли в аккаунт");
+      router.refresh();
 
-  const { mutate, isLoading } = trpc.auth.createPayloadUser.useMutation({
-    onError: (err) => {
-      if (err.data?.code === "CONFLICT") {
-        toast.error("Почта уже используется");
-        return;
-      }
-      if (err instanceof ZodError) {
-        toast.error(err.issues[0].message);
+      if (origin) {
+        router.push(`/${origin}`);
         return;
       }
 
-      toast.error("Что-то пошло не по плану. Попробуйте снова.");
+      if (isSeller) {
+        router.push("/sell");
+        return;
+      }
+
+      router.push("/");
     },
-    onSuccess: ({ sentToEmail }) => {
-      toast.success(`Ссылка подтвержения отправлена на почту ${sentToEmail}`);
-      router.push("/verify-email?to=" + sentToEmail);
+    onError: (err) => {
+      if (err.data?.code === "UNAUTHORIZED") {
+        toast.error("Неверная почта или пароль");
+      }
     },
   });
 
   const onSubmit = ({ email, password }: TAuthCredentialsValidator) => {
-    mutate({ email, password });
+    signIn({ email, password });
   };
 
   return (
@@ -57,16 +73,18 @@ const Page = () => {
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col items-center space-y-2 text-center">
             <Icons.logo className="h-20 w-20" />
-            <h1 className="text-2xl font-bold">Создать аккаунт</h1>
+            <h1 className="text-2xl font-bold">
+              Войти в аккаунт {isSeller ? "селлера" : ""}
+            </h1>
 
             <Link
               className={buttonVariants({
                 variant: "link",
                 className: "text-muted-foreground gap-1",
               })}
-              href="/sign-in"
+              href="/sign-up"
             >
-              Уже есть аккаунт? Войдите
+              Еще нет аккаунта? Регистрация
               <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
@@ -106,9 +124,40 @@ const Page = () => {
                   )}
                 </div>
 
-                <Button>Регистрация</Button>
+                <Button>Вход</Button>
               </div>
             </form>
+
+            <div className="relative">
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 flex items-center"
+              >
+                <span className="w-full border-t"></span>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">
+                  или
+                </span>
+              </div>
+            </div>
+            {isSeller ? (
+              <Button
+                onClick={continueAsBuyer}
+                variant="secondary"
+                disabled={isLoading}
+              >
+                Продолжить как покупатель
+              </Button>
+            ) : (
+              <Button
+                onClick={continueAsSeller}
+                variant="secondary"
+                disabled={isLoading}
+              >
+                Продолжить как селлер
+              </Button>
+            )}
           </div>
         </div>
       </div>
