@@ -8,7 +8,7 @@ const nextConfig = {
 			},
 			{
 				protocol: "https",
-				hostname: "digitalBebra.netlify.app",
+				hostname: "https://nextdigitalstore-production.up.railway.app/",
 			},
 		],
 	},
