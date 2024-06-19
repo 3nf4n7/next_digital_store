@@ -73,10 +73,9 @@ const Navbar = async () => {
                       ></span>
                     </div>
                   )}
-
-                  <div className="ml-4 flow-root lg:ml-6">
-                    <Cart></Cart>
-                  </div>
+                </div>
+                <div className="ml-4 flow-root lg:ml-6">
+                  <Cart></Cart>
                 </div>
               </div>
             </div>
